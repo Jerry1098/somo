@@ -1,14 +1,19 @@
-name: Rust
+name: Continuous Integration
 
 on:
   push:
     paths-ignore:
       - "**/README.md"
+    branches:
+      - master
   pull_request:
+    branches: ["**"]
   workflow_dispatch:
+  workflow_call:
 
 env:
   CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
   rust_toolchain: stable
 
 jobs:
@@ -32,7 +37,17 @@ jobs:
       run: cargo clippy --no-deps -- -Dwarnings
 
     - name: Build | Compile
-      run: cargo build --verbose
-      
+      run: cargo build
+
+
+  test:
+    runs-on: ubuntu-latest
+    needs: compile
+    steps:
+    - name: Setup | Rust
+      uses: dtolnay/rust-toolchain@v1
+      with:
+        toolchain: ${{ env.rust_toolchain }}
+
     - name: Test | Test
-      run: cargo test --verbose
+      run: cargo test
